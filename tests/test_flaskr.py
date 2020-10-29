@@ -1,9 +1,14 @@
 import os
 import json
+import datetime as dt
+from datetime import timedelta
 import tempfile
+from time import strptime, strftime
 
 import pytest
-import flaskr 
+import flaskr
+
+TIME_FORMAT = '%I:%M %p'
 
 
 def test_empty_list(client, app):
@@ -51,9 +56,59 @@ def test_concurrent_routes(client, app):
 
     response = client.get('/routes/next_concurrent_trains?time=9:40%20AM')
     assert response.status_code == 200
-    print(response.data)
     data = json.loads(response.data)
     assert data['time'] == '09:45 AM'
+
+
+def test_empty_routes(client, app):
+    response = client.post('/routes/H1B2',
+                           json={"times": ["9:45 AM"]})
+    assert response.status_code == 201
+    response = client.post('/routes/J',
+                           json={"times": ["9:46 AM"]})
+    assert response.status_code == 201
+
+    response = client.get('/routes/next_concurrent_trains?time=9:40%20AM')
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['time'] == None
+
+
+def test_several_routes(client, app):
+    curr_time = dt.time(4,0,0)
+    times = []
+    while curr_time.hour<23:
+        times.append(curr_time.strftime(TIME_FORMAT))
+        curr_time = (dt.datetime.combine(dt.date(1, 1, 1), curr_time)+timedelta(minutes=12)).time()
+
+    response = client.post('/routes/H1B2',
+                           json={"times": times})
+    assert response.status_code == 201
+
+    curr_time = dt.time(4,4 ,0)
+    times = []
+    while curr_time.hour<23:
+        times.append(curr_time.strftime(TIME_FORMAT))
+        curr_time = (dt.datetime.combine(dt.date(1, 1, 1), curr_time)+timedelta(minutes=20)).time()
+
+    response = client.post('/routes/J',
+                           json={"times": times})
+    assert response.status_code == 201
+
+    curr_time = dt.time(4, 1, 0)
+    times = []
+    while curr_time.hour < 23:
+        times.append(curr_time.strftime(TIME_FORMAT))
+        curr_time = (dt.datetime.combine(dt.date(1, 1, 1), curr_time) + timedelta(minutes=13)).time()
+
+    response = client.post('/routes/Q',
+                           json={"times": times})
+    assert response.status_code == 201
+
+    response = client.get('/routes/next_concurrent_trains?time=9:40%20AM')
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert data['time'] == '10:24 AM'
 
 
 # test bad formated times

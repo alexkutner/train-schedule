@@ -1,6 +1,8 @@
 from flask import Blueprint, Response, request
 from time import strptime, strftime
 from . import db
+
+TIME_FORMAT = '%I:%M %p'
 bp = Blueprint('routes',__name__)
 
 
@@ -33,15 +35,17 @@ def next_concurrent_trains():
     time = request.args.get('time', '')
     concurrent_train_times = build_concurrent_train_list()
     next_time = find_next_concurrent_trains(concurrent_train_times, time)
-
-    return_value = strftime('%I:%M %p', next_time)
+    if next_time:
+        return_value = strftime(TIME_FORMAT, next_time)
+    else:
+        return_value = None
     return {'time': return_value}
 
 
 def convert_times_to_native_types(times_in_string):
     times_in_time = []
     for stime in times_in_string:
-           times_in_time.append(strptime(stime, '%I:%M %p'))
+           times_in_time.append(strptime(stime, TIME_FORMAT))
     return times_in_time
 
 
@@ -52,7 +56,7 @@ def find_next_concurrent_trains(concurrent_train_times, time_searched):
     if end == 0:
         return None
 
-    time = strptime(time_searched, '%I:%M %p')
+    time = strptime(time_searched, TIME_FORMAT)
     while start < end:
         mid = int((start + end) / 2)
         if concurrent_train_times[mid] == time:
@@ -74,7 +78,8 @@ def build_concurrent_train_list():
     it = db.keys()
     schedules = list()
     for key in it:
-        schedules.append(convert_times_to_native_types(db.fetch(key)['times']))
+        times_in_string = db.fetch(key)['times']
+        schedules.append(convert_times_to_native_types(times_in_string))
 
     concurrent_list = []
     while len(schedules) > 1:
@@ -102,5 +107,5 @@ def build_concurrent_train_list():
                 deletion_adjuster += 1
 
         # store the data in time types so we can search against it
-        return concurrent_list
+    return concurrent_list
 
