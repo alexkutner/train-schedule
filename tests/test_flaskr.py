@@ -30,3 +30,8 @@ def test_add_route(client, app):
     assert len(data['routes']) == 1
 
 
+def test_missing_route(client, app):
+    response = client.get('/routes/H1B2')
+    assert response.status_code == 404
+    data = json.loads(response.data)
+    assert data['message']).contains('not found')

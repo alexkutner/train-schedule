@@ -14,12 +14,14 @@ def add_route(id):
 @bp.route('/routes/<id>', methods=['GET'])
 def get_route(id):
     route_list = db.fetch(id)
+    if not route_list:
+        return Response({'message': 'no value exists for given key'}, mimetype="application/json", status=404)
     return route_list
 
 
 @bp.route('/routes')
 def get_list_of_routes():
     keys = db.keys()
-    return {"routes":keys}
+    return {"routes": keys}
 
 
