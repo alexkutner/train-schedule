@@ -1,5 +1,7 @@
 import os
 import tempfile
+import pathlib
+import shutil
 
 import pytest
 from flaskr import create_app
@@ -11,21 +13,21 @@ from flaskr.db import get_db, init_db
 
 @pytest.fixture
 def app():
-    db_fd, db_path = tempfile.mkstemp()
+    db_path = tempfile.mkdtemp()
 
     app = create_app({
         'TESTING': True,
-        'DATABASE': db_path,
+        'DATABASE': os.path.join(db_path, "tempdb")
     })
 
     with app.app_context():
         init_db()
+        print("hi")
 #        get_db().executescript(_data_sql)
 
     yield app
+    shutil.rmtree(db_path)
 
-    os.close(db_fd)
-    os.unlink(db_path)
 
 
 @pytest.fixture

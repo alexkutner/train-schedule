@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "1b2f3fc4f26dc2585be7c8b53bcf01bb23a9c6d15b0e8f430a47755d19b38f21"
+            "sha256": "f8b77894592f870d1956dc4639e97646739649fa8575956258810b9a706f2713"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -141,6 +141,15 @@
             ],
             "index": "pypi",
             "version": "==6.1.2"
+        },
+        "rocksdb": {
+            "hashes": [
+                "sha256:27c366d7e6e9058eb47aeae607671544cc63a4413abd2035aad82a674dbf9f84",
+                "sha256:3f78c5ba0659489e4653b8318eceaa803533c29fc7b4d9585514c7a071bc91ee",
+                "sha256:6f89999367e79e40a9e45e69676b5672e491652d35c0062b26ee7f61303e9378"
+            ],
+            "index": "pypi",
+            "version": "==0.7.0"
         },
         "six": {
             "hashes": [
