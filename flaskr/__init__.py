@@ -30,9 +30,4 @@ def create_app(test_config=None):
     db.init_app(app)
     app.register_blueprint(routes.bp)
 
-    # a simple page that says hello
-    @app.route('/hello')
-    def hello():
-        return 'Hello, World!'
-
     return app
