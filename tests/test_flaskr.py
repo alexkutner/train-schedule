@@ -29,7 +29,7 @@ def test_empty_list(client, app):
 
 def test_add_route(client, app):
     response = client.post('/routes/H1B2',
-                           data=json.dumps({"times":["9:45 AM"]})) 
+                           json={"times":["9:45 AM"]})
     assert response.status_code == 200
 
     response = client.get('/routes/H1B2') 

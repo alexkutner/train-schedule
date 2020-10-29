@@ -1,8 +1,10 @@
-import sqlite3
 import rocksdb
+import json
 import click
 from flask import current_app, g
 from flask.cli import with_appcontext
+
+ENCODING = 'utf_8'
 g_db = None
 
 def get_db():
@@ -48,12 +50,22 @@ def init_app(app):
     app.cli.add_command(init_db_command)
 
 def set(key, value):
+    key_as_bytes = key.encode(ENCODING)
+    value_as_bytes = json.dumps(value).encode(ENCODING)
+
     db = get_db()
-    db.put(key, value)
+    db.put(key_as_bytes, value_as_bytes)
 
 def fetch(key):
+    value_as_json = None
+    key_as_bytes = key.encode(ENCODING)
     db = get_db()
-    return db.get(key)
+    value_as_bytes = db.get(key_as_bytes)
+    if value_as_bytes:
+        value_as_json = json.loads(value_as_bytes.decode(ENCODING))
+
+    return value_as_json
+
 
 def keys():
     db = get_db()

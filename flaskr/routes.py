@@ -1,16 +1,20 @@
 from flask import Blueprint, Response, request
+from . import db
 bp = Blueprint('routes',__name__)
+
 
 @bp.route('/routes/<id>', methods=['POST'])
 def add_route(id):
     body = request.get_json()
     print(body)
+    db.set(id, body)
     return Response({'status':'success'}, mimetype="application/json", status=200)
     
 
 @bp.route('/routes/<id>', methods=['GET'])
 def get_route(id):
-    return {"name":"ABC","times":['9:30AM','12:00PM']}
+    route_list = db.fetch(id)
+    return route_list
 
 
 @bp.route('/routes')
