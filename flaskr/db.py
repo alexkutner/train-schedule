@@ -30,9 +30,10 @@ def close_db(e=None):
 
 def init_db():
     db = get_db()
-
-    #for key in db.iterkeys():
-    #    db.delete(key)
+    it = db.iterkeys()
+    it.seek_to_first()
+    for key in it:
+        db.delete(key)
 
     #with current_app.open_resource('schema.sql') as f:
     #    db.executescript(f.read().decode('utf8'))
@@ -69,4 +70,7 @@ def fetch(key):
 
 def keys():
     db = get_db()
-    return [a for a in db.keys.iterkeys()]
+    it = db.iterkeys()
+    it.seek_to_first()
+
+    return [a.decode(ENCODING) for a in it]

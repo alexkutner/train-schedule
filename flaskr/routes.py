@@ -8,7 +8,7 @@ def add_route(id):
     body = request.get_json()
     print(body)
     db.set(id, body)
-    return Response({'status':'success'}, mimetype="application/json", status=200)
+    return Response({'status': 'success'}, mimetype="application/json", status=200)
     
 
 @bp.route('/routes/<id>', methods=['GET'])
@@ -19,6 +19,7 @@ def get_route(id):
 
 @bp.route('/routes')
 def get_list_of_routes():
-    return {"routes":[]}
+    keys = db.keys()
+    return {"routes":keys}
 
 
