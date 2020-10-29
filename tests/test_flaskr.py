@@ -16,7 +16,7 @@ def test_empty_list(client, app):
 def test_add_route(client, app):
     response = client.post('/routes/H1B2',
                            json={"times":["9:45 AM"]})
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     response = client.get('/routes/H1B2') 
     assert response.status_code == 200
@@ -33,3 +33,8 @@ def test_add_route(client, app):
 def test_missing_route(client, app):
     response = client.get('/routes/H1B2')
     assert response.status_code == 404
+
+def test_add_route_with_long_name(client, app):
+    response = client.post('/routes/a_name_longer_then_4_chars',
+                           json={"times":["9:45 AM"]})
+    assert response.status_code == 400

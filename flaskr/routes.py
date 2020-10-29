@@ -5,10 +5,12 @@ bp = Blueprint('routes',__name__)
 
 @bp.route('/routes/<id>', methods=['POST'])
 def add_route(id):
+    # limit the lenght of key's to 4
+    if(len(id)> 4):
+        return Response(status=400)
     body = request.get_json()
-    print(body)
     db.set(id, body)
-    return Response({'status': 'success'}, mimetype="application/json", status=200)
+    return Response({'status': 'success'}, mimetype="application/json", status=201)
     
 
 @bp.route('/routes/<id>', methods=['GET'])
