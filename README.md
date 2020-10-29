@@ -3,7 +3,7 @@
 dependencies
 pipenv
 
-##to run
+## To run
 - clone repo
 - pipenv install
 - pipenv shell
@@ -11,13 +11,21 @@ pipenv
 - export FLASK_ENV=development  # to enable debugger
 - flask run
 
-##run test
+## Run test
 - pytest
 
-##assumptions:
+## Assumptions:
 - We want to return accurate results for every query
 - That there will be multiple instances of this service running
 
 
-##results:
-- We are building the concurrent data structure for each request as we can't build it when data is added because we don't have a way to deal with two updates coming in on two servers at the same time.
+## Results:
+- We are building the concurrent data structure for each request as we can't build it when data is added because we 
+don't have a way to deal with two updates coming in on two servers at the same time.  Ideally this work db io and 
+searching for matches would be done when the service starts up or when the db state is mutated.  Making this change would 
+not be to hard as the data structure should just be added to the server context.
+
+## Known issues
+- Have not yet added application logging
+- Don't yet handle times that are sent out of order
+- Have not yet added check for bad incoming data
