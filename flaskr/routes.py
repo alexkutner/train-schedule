@@ -1,4 +1,5 @@
 from flask import Blueprint, Response, request
+from time import strptime, strftime
 from . import db
 bp = Blueprint('routes',__name__)
 
@@ -30,33 +31,50 @@ def get_list_of_routes():
 @bp.route('/routes/next_concurrent_trains')
 def next_concurrent_trains():
     time = request.args.get('time', '')
-    return_value = find_next_concurrent_trains(time)
+    concurrent_train_times = build_concurrent_train_list()
+    next_time = find_next_concurrent_trains(concurrent_train_times, time)
 
+    return_value = strftime('%I:%M %p', next_time)
     return {'time': return_value}
 
 
-def find_next_concurrent_trains(time):
-    concurrent_train_times = build_concurrent_table()
+def convert_times_to_native_types(times_in_string):
+    times_in_time = []
+    for stime in times_in_string:
+           times_in_time.append(strptime(stime, '%I:%M %p'))
+    return times_in_time
+
+
+# b-search across a sorted list to find the next time.  If we end up off the end then return the 1st element
+def find_next_concurrent_trains(concurrent_train_times, time_searched):
     start = 0
     end = len(concurrent_train_times)
+    if end == 0:
+        return None
+
+    time = strptime(time_searched, '%I:%M %p')
     while start < end:
-        mid = int(start + (start + end) / 2)
+        mid = int((start + end) / 2)
         if concurrent_train_times[mid] == time:
             return time
         elif concurrent_train_times[mid] < time:
             start = mid + 1
         else:
             end = mid
-    return concurrent_train_times[mid]
+
+    # if we went past the end looking return the 1st element as we want to wrap
+    if start >= len(concurrent_train_times):
+        start = 0
+    return concurrent_train_times[start]
 
 
-# return a sorted list of times where multiple trains will be in the station at the same time
+# return a sorted list of times when multiple trains will be in the station at the same time
 # The list is build by doing a sort of merge sort across all routes submitted
-def build_concurrent_table():
+def build_concurrent_train_list():
     it = db.keys()
     schedules = list()
     for key in it:
-        schedules.append(db.fetch(key)['times'])
+        schedules.append(convert_times_to_native_types(db.fetch(key)['times']))
 
     concurrent_list = []
     while len(schedules) > 1:
@@ -83,6 +101,6 @@ def build_concurrent_table():
                 schedules.pop(i-deletion_adjuster)
                 deletion_adjuster += 1
 
+        # store the data in time types so we can search against it
         return concurrent_list
-
 

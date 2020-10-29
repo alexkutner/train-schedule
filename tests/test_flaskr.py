@@ -43,17 +43,17 @@ def test_add_route_with_long_name(client, app):
 
 def test_concurrent_routes(client, app):
     response = client.post('/routes/H1B2',
-                           json={"times":["9:45 AM"]})
+                           json={"times": ["9:45 AM"]})
     assert response.status_code == 201
     response = client.post('/routes/J',
-                           json={"times":["9:45 AM"]})
+                           json={"times": ["9:45 AM"]})
     assert response.status_code == 201
 
-    response = client.get('/routes/next_concurrent_trains?time=9:40AM')
+    response = client.get('/routes/next_concurrent_trains?time=9:40%20AM')
     assert response.status_code == 200
     print(response.data)
     data = json.loads(response.data)
-    assert data['time'] == '9:45 AM'
+    assert data['time'] == '09:45 AM'
 
 
 # test bad formated times
