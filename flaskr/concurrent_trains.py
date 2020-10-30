@@ -8,8 +8,12 @@ TIME_FORMAT = '%I:%M %p'
 def convert_times_to_native_types(times_in_string):
     times_in_time = []
     for stime in times_in_string:
-           times_in_time.append(strptime(stime, TIME_FORMAT))
+        times_in_time.append(convert_string_to_time(stime))
     return times_in_time
+
+
+def convert_string_to_time(stime):
+    return strptime(stime, TIME_FORMAT)
 
 
 # b-search across a sorted list to find the next time.  If we end up off the end then return the 1st element
@@ -19,12 +23,11 @@ def find_next_concurrent_trains(concurrent_train_times, time_searched):
     if end == 0:
         return None
 
-    time = strptime(time_searched, TIME_FORMAT)
     while start < end:
         mid = int((start + end) / 2)
-        if concurrent_train_times[mid] == time:
-            return time
-        elif concurrent_train_times[mid] < time:
+        if concurrent_train_times[mid] == time_searched:
+            return time_searched
+        elif concurrent_train_times[mid] < time_searched:
             start = mid + 1
         else:
             end = mid

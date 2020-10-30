@@ -70,6 +70,10 @@ def test_empty_routes(client, app):
     data = json.loads(response.data)
     assert data['time'] == None
 
+def test_bad_time_for_concurrent_lookup(client, app):
+    response = client.get('/routes/next_concurrent_trains?time=hamburger')
+    assert response.status_code == 400
+
 
 def test_several_routes(client, app):
     curr_time = dt.time(4,0,0)
