@@ -33,5 +33,4 @@ not be to hard as the data structure should just be added to the server context.
 
 ## Known issues
 - Have not yet added application logging
-- Don't yet handle times that are sent out of order
-- Have not yet added check for bad incoming data
+- missing swagger API docs
