@@ -1,4 +1,4 @@
-from time import strptime
+from time import strptime, struct_time
 
 from . import db
 TIME_FORMAT = '%I:%M %p'
@@ -18,59 +18,41 @@ def convert_string_to_time(stime):
 
 # b-search across a sorted list to find the next time.  If we end up off the end then return the 1st element
 def find_next_concurrent_trains(concurrent_train_times, time_searched):
-    start = 0
-    end = len(concurrent_train_times)
-    if end == 0:
-        return None
+    key = time_searched.tm_hour * 60 + time_searched.tm_min
 
-    while start < end:
-        mid = int((start + end) / 2)
-        if concurrent_train_times[mid] == time_searched:
-            return time_searched
-        elif concurrent_train_times[mid] < time_searched:
-            start = mid + 1
-        else:
-            end = mid
-
-    # if we went past the end looking return the 1st element as we want to wrap
-    if start >= len(concurrent_train_times):
-        start = 0
-    return concurrent_train_times[start]
+    minute_of_day = concurrent_train_times[key]
+    if minute_of_day:
+        time = struct_time((0,0,0, #year.mon.day
+                            int(minute_of_day/60),
+                            minute_of_day%60,
+                            0, 0, 0, 0 #sec and smaller
+                            ))
+        return time
+    return None
 
 
-# return a sorted list of times when multiple trains will be in the station at the same time
-# The list is build by doing a sort of merge sort across all routes submitted
+# return a list of times that can be indexed into to return the next avalable train
 def build_concurrent_train_list():
     it = db.keys()
-    schedules = list()
+    concurrent_list = [0]*24*60 #build array of 0's to hold values
     for key in it:
         times_in_string = db.fetch(key)['times']
-        schedules.append(convert_times_to_native_time_objects(times_in_string))
+        times = convert_times_to_native_time_objects(times_in_string)
+        for t in times:
+            concurrent_list[t.tm_hour * 60 + t.tm_min] += 1
 
-    concurrent_list = []
-    while len(schedules) > 1:
-        popset = []
-        min_val = None
-        # move through sets looking for small non matches or groups of matches
-        for i in range(0, len(schedules)):
-            if not min_val or min_val > schedules[i][0]:
-                popset = [i]
-                min_val = schedules[i][0]
-            elif min_val == schedules[i][0]:
-                min_val == schedules[i][0]
-                popset.append(i)
+    current_concurrent_value = None
+    # grab the min value to set the concurrent list with as we walk backwards
+    for idx, val in enumerate(concurrent_list):
+        if val > 1:
+            current_concurrent_value = idx
+            break
 
-        # if we found a match copy it from the first schedule we saw it on
-        if len(popset) > 1:
-            concurrent_list.append(schedules[popset[0]][0])
+    concurrent_lookup = [None]*24*60
 
-        # remove smallest items in list
-        deletion_adjuster = 0
-        for i in popset:
-            schedules[i-deletion_adjuster].pop(0)
-            if len(schedules[i-deletion_adjuster]) == 0:
-                schedules.pop(i-deletion_adjuster)
-                deletion_adjuster += 1
+    for idx in range(len(concurrent_list)-1, -1, -1):
+        if concurrent_list[idx] > 1:
+            current_concurrent_value = idx
+        concurrent_lookup[idx] = current_concurrent_value
 
-        # store the data in time types so we can search against it
-    return concurrent_list
+    return concurrent_lookup
