@@ -5,7 +5,7 @@ TIME_FORMAT = '%I:%M %p'
 
 
 # convert a list of times in string format to one in python time objects
-def convert_times_to_native_types(times_in_string):
+def convert_times_to_native_time_objects(times_in_string):
     times_in_time = []
     for stime in times_in_string:
         times_in_time.append(convert_string_to_time(stime))
@@ -45,7 +45,7 @@ def build_concurrent_train_list():
     schedules = list()
     for key in it:
         times_in_string = db.fetch(key)['times']
-        schedules.append(convert_times_to_native_types(times_in_string))
+        schedules.append(convert_times_to_native_time_objects(times_in_string))
 
     concurrent_list = []
     while len(schedules) > 1:

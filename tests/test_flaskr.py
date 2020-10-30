@@ -24,12 +24,31 @@ def test_add_route(client, app):
     assert response.status_code == 200
     data = json.loads(response.data)
     assert len(data['times']) == 1
-    assert data['times'][0] == '9:45 AM'
+    assert data['times'][0] == '09:45 AM'
 
     response = client.get('/routes')
     assert response.status_code == 200
     data = json.loads(response.data)
     assert len(data['routes']) == 1
+
+
+def test_add_route_out_of_order(client, app):
+    response = client.post('/routes/H1B2',
+                           json={"times":["9:45 AM", "5:45 AM", "2:45 AM", "7:45 PM"]})
+    assert response.status_code == 201
+
+    response = client.get('/routes/H1B2')
+    assert response.status_code == 200
+    data = json.loads(response.data)
+    assert len(data['times']) == 4
+    assert data['times'][0] == '02:45 AM'
+    assert data['times'][1] == '05:45 AM'
+
+
+def test_add_route_with_invalid_time(client, app):
+    response = client.post('/routes/H1B2',
+                           json={"times":["9:45 AM", "bacon", "eggs", "7:45 PM"]})
+    assert response.status_code == 400
 
 
 def test_missing_route(client, app):

@@ -1,7 +1,7 @@
-from flaskr.concurrent_trains import find_next_concurrent_trains, convert_times_to_native_types, convert_string_to_time
+from flaskr.concurrent_trains import find_next_concurrent_trains, convert_times_to_native_time_objects, convert_string_to_time
 
 TIMES = ['03:00 AM', '05:00 AM', '09:00 AM', '05:00 PM', '05:02 PM', '09:03 PM']
-ENCODED_TIMES = convert_times_to_native_types(TIMES)
+ENCODED_TIMES = convert_times_to_native_time_objects(TIMES)
 
 
 def test_search():

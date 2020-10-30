@@ -1,7 +1,7 @@
 from flask import Blueprint, Response, request
 from time import strftime
 from . import db
-from .concurrent_trains import find_next_concurrent_trains, build_concurrent_train_list, convert_string_to_time
+from .concurrent_trains import find_next_concurrent_trains, build_concurrent_train_list, convert_string_to_time, convert_times_to_native_time_objects
 
 TIME_FORMAT = '%I:%M %p'
 bp = Blueprint('routes', __name__)
@@ -13,6 +13,16 @@ def add_route(key):
     if len(key) > 4:
         return Response(status=400)
     body = request.get_json()
+    native_times = None
+    try:
+        native_times = convert_times_to_native_time_objects(body['times'])
+    except ValueError:
+        # if we can't parse the time return an error
+        return Response(status=400)
+
+    native_times.sort()
+    body['times'] = [strftime(TIME_FORMAT, a) for a in native_times]
+
     db.set(key, body)
     return Response({'status': 'success'}, mimetype="application/json", status=201)
     
