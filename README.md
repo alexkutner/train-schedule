@@ -14,6 +14,12 @@ pipenv
 ## Run test
 - pytest
 
+## Code
+- handlers for web requests lives in flaskr/routes.py
+- db logic wrapping rocksdb lives in flaskr/db.py
+- logic to build up a set of concurrent trains and search that set lives in flaskr/concurrent_trains.py
+- tests live in tests
+
 ## Assumptions:
 - We want to return accurate results for every query
 - That there will be multiple instances of this service running
