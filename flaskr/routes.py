@@ -35,7 +35,7 @@ def add_route(key):
 
     db.set(key, value_as_bytes)
 
-    #lock db for lookup write
+    # lock db for lookup write if we can't acquire the lock we should log errors
     if db.lock_db():
         # build up train list
         concurrent_train_times = build_concurrent_train_list()
