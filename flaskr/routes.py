@@ -83,7 +83,6 @@ def next_concurrent_trains():
     # reduce load on persistence layer and improve perf.  This could be done on a background thread too but it really
     # would only help out a very small number of calls.
     if in_mem_train_times_update_time + timedelta(minutes=5) < datetime.now():
-        print("reload trian data")
         with in_mem_train_times_update_lock:
             if in_mem_train_times_update_time + timedelta(minutes=5) < datetime.now():
                 update_concurrent_trains()
