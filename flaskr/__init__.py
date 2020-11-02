@@ -29,5 +29,7 @@ def create_app(test_config=None):
     from . import db
     db.init_app(app)
     app.register_blueprint(routes.bp)
+    with app.app_context():
+        routes.update_concurrent_trains()
 
     return app
