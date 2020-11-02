@@ -1,5 +1,5 @@
 from time import strptime, struct_time
-
+import json
 from . import db
 TIME_FORMAT = '%I:%M %p'
 
@@ -21,7 +21,7 @@ def find_next_concurrent_trains(concurrent_train_times, time_searched):
     key = time_searched.tm_hour * 60 + time_searched.tm_min
 
     minute_of_day = concurrent_train_times[key]
-    if minute_of_day:
+    if minute_of_day != 0:
         time = struct_time((0,0,0, #year.mon.day
                             int(minute_of_day/60),
                             minute_of_day%60,
@@ -36,19 +36,22 @@ def build_concurrent_train_list():
     it = db.keys()
     concurrent_list = [0]*24*60 #build array of 0's to hold values
     for key in it:
-        times_in_string = db.fetch(key)['times']
-        times = convert_times_to_native_time_objects(times_in_string)
-        for t in times:
-            concurrent_list[t.tm_hour * 60 + t.tm_min] += 1
+        if len(key) < 5:
+            times_in_bytes = db.fetch(key)
+            value_as_json = json.loads(times_in_bytes.decode(db.ENCODING))['times']
 
-    current_concurrent_value = None
+            times = convert_times_to_native_time_objects(value_as_json)
+            for t in times:
+                concurrent_list[t.tm_hour * 60 + t.tm_min] += 1
+
+    current_concurrent_value = 0
     # grab the min value to set the concurrent list with as we walk backwards
     for idx, val in enumerate(concurrent_list):
         if val > 1:
             current_concurrent_value = idx
             break
 
-    concurrent_lookup = [None]*24*60
+    concurrent_lookup = [0]*24*60
 
     for idx in range(len(concurrent_list)-1, -1, -1):
         if concurrent_list[idx] > 1:

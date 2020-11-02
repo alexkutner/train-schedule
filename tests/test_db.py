@@ -4,6 +4,6 @@ import flaskr.db as db
 
 
 def test_add(app):
-    db.set("test_key", {"test_name":"test_value"})
+    db.set("test_key", b"test_data_range")
     value = db.fetch("test_key")
-    assert value["test_name"] == "test_value"
+    assert value == b"test_data_range"
